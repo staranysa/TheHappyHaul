@@ -1,0 +1,164 @@
+.share-view {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.share-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.share-header h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.share-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+.shared-wishlist-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.shared-kid-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.shared-kid-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.shared-kid-header h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.shared-kid-header .kid-age {
+  font-size: 1.4rem;
+  color: #666;
+  font-weight: normal;
+}
+
+.shared-kid-header .item-count {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.wishlist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empty-wishlist {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+.share-footer {
+  text-align: center;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.home-link {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  transition: all 0.2s;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.home-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.error-container {
+  max-width: 600px;
+  margin: 100px auto;
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.error-container h2 {
+  color: #e74c3c;
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+.error-container p {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 24px;
+}
+
+.error-container .home-link {
+  color: #667eea;
+  background: #f0f0f0;
+  border-color: #e0e0e0;
+}
+
+.error-container .home-link:hover {
+  background: #e0e0e0;
+}
+
+.support-link-share {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s;
+}
+
+.support-link-share:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .share-header h1 {
+    font-size: 2rem;
+  }
+  
+  .shared-kid-card {
+    padding: 24px;
+  }
+}
+

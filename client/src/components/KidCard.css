@@ -1,0 +1,112 @@
+.kid-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kid-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.kid-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.kid-name-section h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.kid-age {
+  font-size: 1.2rem;
+  color: #666;
+  font-weight: normal;
+}
+
+.item-count {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.kid-card-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.toggle-btn,
+.delete-kid-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  color: #666;
+}
+
+.toggle-btn:hover,
+.delete-kid-btn:hover {
+  background: #f0f0f0;
+}
+
+.delete-kid-btn {
+  color: #e74c3c;
+}
+
+.delete-kid-btn:hover {
+  background: #fee;
+  color: #c0392b;
+}
+
+.kid-card-content {
+  margin-top: 16px;
+}
+
+.empty-wishlist {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+  font-style: italic;
+}
+
+.wishlist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.add-item-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.add-item-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.add-item-btn:active {
+  transform: translateY(0);
+}
+
