@@ -994,6 +994,20 @@ app.use((err, req, res, next) => {
   }
 });
 
+// Root route - API info
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'The Happy Haul API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth/register, /api/auth/login, /api/auth/me',
+      kids: '/api/kids',
+      search: '/api/search',
+      share: '/api/share/:shareToken'
+    }
+  });
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
