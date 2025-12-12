@@ -937,48 +937,66 @@ app.get('/api/search', async (req, res) => {
 
 // Initialize server
 async function startServer() {
-  // Verify we're in the correct directory structure
-  const projectRoot = path.join(__dirname, '..');
-  const expectedPackageJson = path.join(projectRoot, 'package.json');
-  
   try {
-    await fs.access(expectedPackageJson);
-    console.log('✓ Project structure verified');
-  } catch (error) {
-    console.error('⚠️  Warning: Could not verify project structure at:', expectedPackageJson);
-    console.error('   Current __dirname:', __dirname);
-    console.error('   This may cause issues if paths are incorrect.');
-  }
-  
-  await ensureDataDir();
-  await initializeUsers();
-  await initializeData();
-  // Ensure uploads directory exists
-  try {
-    await fs.mkdir(UPLOADS_DIR, { recursive: true });
-  } catch (error) {
-    console.error('Error creating uploads directory:', error);
-  }
-  
-  // Start server with better error handling
-  const server = app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-  
-  server.on('error', (error) => {
-    if (error.code === 'EADDRINUSE') {
-      console.error(`\n❌ Error: Port ${PORT} is already in use.`);
-      console.error('   Another server instance may be running.');
-      console.error('   To fix this:');
-      console.error(`   1. Find the process: lsof -ti :${PORT}`);
-      console.error(`   2. Kill it: kill -9 $(lsof -ti :${PORT})`);
-      console.error('   3. Or stop any other instances of npm run dev\n');
-      process.exit(1);
-    } else {
-      console.error('Server error:', error);
-      throw error;
+    // Verify we're in the correct directory structure
+    const projectRoot = path.join(__dirname, '..');
+    const expectedPackageJson = path.join(projectRoot, 'package.json');
+    
+    try {
+      await fs.access(expectedPackageJson);
+      console.log('✓ Project structure verified');
+    } catch (error) {
+      console.error('⚠️  Warning: Could not verify project structure at:', expectedPackageJson);
+      console.error('   Current __dirname:', __dirname);
+      console.error('   This may cause issues if paths are incorrect.');
     }
-  });
+    
+    console.log('Initializing data directories...');
+    await ensureDataDir();
+    
+    console.log('Initializing users file...');
+    await initializeUsers();
+    
+    console.log('Initializing data file...');
+    await initializeData();
+    
+    // Ensure uploads directory exists
+    try {
+      await fs.mkdir(UPLOADS_DIR, { recursive: true });
+      console.log('✓ Uploads directory ready');
+    } catch (error) {
+      console.error('Error creating uploads directory:', error);
+    }
+    
+    // Start server with better error handling
+    const server = app.listen(PORT, () => {
+      console.log(`✓ Server running on port ${PORT}`);
+      console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+    
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`\n❌ Error: Port ${PORT} is already in use.`);
+        console.error('   Another server instance may be running.');
+        console.error('   To fix this:');
+        console.error(`   1. Find the process: lsof -ti :${PORT}`);
+        console.error(`   2. Kill it: kill -9 $(lsof -ti :${PORT})`);
+        console.error('   3. Or stop any other instances of npm run dev\n');
+        process.exit(1);
+      } else {
+        console.error('Server error:', error);
+        throw error;
+      }
+    });
+    
+    console.log('✓ Server initialization complete');
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    throw error;
+  }
 }
 
 // Error handling middleware (must be after all routes)
@@ -1013,5 +1031,10 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-startServer();
+// Start server with error handling
+startServer().catch((error) => {
+  console.error('Failed to start server:', error);
+  console.error('Error stack:', error.stack);
+  process.exit(1);
+});
 
