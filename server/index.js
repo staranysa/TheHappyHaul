@@ -1,3 +1,55 @@
+// Polyfill File API for Node.js (required by undici/axios in Node.js 18)
+// This must be defined before any modules that use it are loaded
+if (typeof global.File === 'undefined') {
+  global.File = class File {
+    constructor(bits, name, options = {}) {
+      this.name = name;
+      this.size = Array.isArray(bits) ? bits.reduce((acc, bit) => acc + (bit.size || bit.length || 0), 0) : (bits?.size || bits?.length || 0);
+      this.type = options.type || '';
+      this.lastModified = options.lastModified || Date.now();
+      this._bits = bits;
+    }
+    stream() {
+      return new ReadableStream();
+    }
+    arrayBuffer() {
+      return Promise.resolve(new ArrayBuffer(0));
+    }
+    text() {
+      return Promise.resolve('');
+    }
+    slice(start, end, contentType) {
+      return new File([], this.name, { type: contentType || this.type });
+    }
+  };
+  
+  // Also define FileReader if needed
+  if (typeof global.FileReader === 'undefined') {
+    global.FileReader = class FileReader {
+      constructor() {
+        this.result = null;
+        this.error = null;
+        this.readyState = 0;
+      }
+      readAsArrayBuffer(file) {
+        this.result = new ArrayBuffer(0);
+        this.readyState = 2;
+        if (this.onload) this.onload({ target: this });
+      }
+      readAsText(file) {
+        this.result = '';
+        this.readyState = 2;
+        if (this.onload) this.onload({ target: this });
+      }
+      readAsDataURL(file) {
+        this.result = 'data:application/octet-stream;base64,';
+        this.readyState = 2;
+        if (this.onload) this.onload({ target: this });
+      }
+    };
+  }
+}
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
