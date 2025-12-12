@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../contexts/AuthContext';
 import './AddItemForm.css';
+import { API_BASE } from '../config/api';
 
 function AddItemForm({ onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
@@ -39,7 +40,7 @@ function AddItemForm({ onSubmit, onCancel }) {
     setFetchingTitle(true);
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/extract-title', {
+      const response = await fetch(`${API_BASE}/extract-title`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +97,7 @@ function AddItemForm({ onSubmit, onCancel }) {
           formDataUpload.append('image', imageFile);
           
           const token = localStorage.getItem('authToken');
-          const response = await fetch('/api/upload-image', {
+          const response = await fetch(`${API_BASE}/upload-image`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './WishlistItem.css';
+import { API_BASE } from '../config/api';
 
 function WishlistItem({ item, onDelete, onUpdate, readOnly = false, allowPurchase = false }) {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ function WishlistItem({ item, onDelete, onUpdate, readOnly = false, allowPurchas
         formDataUpload.append('image', imageFile);
         
         const token = localStorage.getItem('authToken');
-        const response = await fetch('/api/upload-image', {
+        const response = await fetch(`${API_BASE}/upload-image`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`

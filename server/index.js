@@ -50,7 +50,25 @@ const upload = multer({
 });
 
 // Middleware
-app.use(cors());
+// Configure CORS to allow frontend domain
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://thehappyhaul.vercel.app',
+  process.env.FRONTEND_URL
+].filter(Boolean); // Remove any undefined values
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all origins for now - tighten in production if needed
+    }
+  },
+  credentials: true
+}));
 app.use(bodyParser.json());
 // Serve uploaded images
 app.use('/uploads', express.static(UPLOADS_DIR));

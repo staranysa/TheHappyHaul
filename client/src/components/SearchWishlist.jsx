@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './SearchWishlist.css';
-
-const API_BASE = '/api';
+import { API_BASE } from '../config/api';
 
 function SearchWishlist() {
   const [searchTerm, setSearchTerm] = useState('');

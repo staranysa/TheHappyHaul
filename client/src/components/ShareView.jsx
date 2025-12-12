@@ -3,8 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import './ShareView.css';
 import WishlistItem from './WishlistItem';
-
-const API_BASE = '/api';
+import { API_BASE } from '../config/api';
 // ShareView uses regular axios since it's a public route
 
 function ShareView() {
