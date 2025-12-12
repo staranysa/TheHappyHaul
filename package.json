@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "The Happy Haul - Online wishlist app for kids",
   "main": "server/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server/index.js",
