@@ -64,9 +64,20 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const DATA_FILE = path.join(__dirname, 'data', 'wishlist.json');
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
+
+// Use DATA_DIR environment variable for persistent storage (Railway Volumes)
+// Falls back to local ./server/data directory for development
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+const UPLOADS_BASE = process.env.DATA_DIR || __dirname;
+
+const DATA_FILE = path.join(DATA_DIR, 'wishlist.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const UPLOADS_DIR = path.join(UPLOADS_BASE, 'uploads');
+
+console.log('Data directory:', DATA_DIR);
+console.log('Data file:', DATA_FILE);
+console.log('Users file:', USERS_FILE);
+console.log('Uploads directory:', UPLOADS_DIR);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
