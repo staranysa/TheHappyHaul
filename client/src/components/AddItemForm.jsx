@@ -137,6 +137,9 @@ function AddItemForm({ onSubmit, onCancel }) {
 
   return (
     <form className="add-item-form" onSubmit={handleSubmit}>
+      <p className="privacy-note">
+        🔓 Note: This wishlist will be shared. Avoid adding personal notes or identifying information.
+      </p>
       <input
         type="url"
         name="url"

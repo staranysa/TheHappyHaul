@@ -48,6 +48,10 @@ function RegisterForm() {
           <h2>Create Account</h2>
         </div>
         
+        <div className="privacy-warning">
+          <p>🔓 <strong>Important:</strong> Your wishlists are meant to be shared! Please avoid using real names, personal email addresses, or sensitive information. Keep it fun and anonymous!</p>
+        </div>
+        
         <form onSubmit={handleSubmit} className="auth-form">
           {error && <div className="auth-error">{error}</div>}
           

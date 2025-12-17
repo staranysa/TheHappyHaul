@@ -5,14 +5,16 @@ function AddKidForm({ onAdd }) {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [privacyAcknowledged, setPrivacyAcknowledged] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (name.trim()) {
+    if (name.trim() && privacyAcknowledged) {
       onAdd(name.trim(), age.trim() || null);
       setName('');
       setAge('');
       setIsExpanded(false);
+      setPrivacyAcknowledged(false);
     }
   };
 
@@ -40,6 +42,7 @@ function AddKidForm({ onAdd }) {
         className="add-kid-input"
         required
       />
+      <p className="privacy-hint">💡 Tip: Use nicknames or initials only (e.g., "Little J" instead of "Jennifer Smith")</p>
       <input
         type="number"
         placeholder="Age (optional)"
@@ -49,8 +52,17 @@ function AddKidForm({ onAdd }) {
         max="18"
         className="add-kid-input"
       />
+      <label className="privacy-checkbox">
+        <input
+          type="checkbox"
+          checked={privacyAcknowledged}
+          onChange={(e) => setPrivacyAcknowledged(e.target.checked)}
+          required
+        />
+        <span>I understand this is a public wishlist app and will not include personal or sensitive information.</span>
+      </label>
       <div className="add-kid-actions">
-        <button type="submit" className="submit-btn">
+        <button type="submit" className="submit-btn" disabled={!privacyAcknowledged}>
           Add
         </button>
         <button
@@ -59,6 +71,7 @@ function AddKidForm({ onAdd }) {
             setIsExpanded(false);
             setName('');
             setAge('');
+            setPrivacyAcknowledged(false);
           }}
           className="cancel-btn"
         >
