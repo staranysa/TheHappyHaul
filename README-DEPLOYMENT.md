@@ -121,3 +121,4 @@ This guide explains how to deploy The Happy Haul app with the frontend on Vercel
 
 Update `server/index.js` to use cloud storage for production.
 
+

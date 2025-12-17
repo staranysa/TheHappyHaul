@@ -1064,24 +1064,41 @@ app.use((err, req, res, next) => {
   }
 });
 
-// Root route - API info
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'The Happy Haul API',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/api/auth/register, /api/auth/login, /api/auth/me',
-      kids: '/api/kids',
-      search: '/api/search',
-      share: '/api/share/:shareToken'
+// Serve static files from React app in production (must be after all API routes)
+if (process.env.NODE_ENV === 'production') {
+  const clientDistPath = path.join(__dirname, '../client/dist');
+  
+  // Serve static files from the React build
+  app.use(express.static(clientDistPath));
+  
+  // Handle React routing - return index.html for all non-API routes
+  app.get('*', (req, res) => {
+    // Don't serve index.html for API routes
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ error: 'Route not found' });
     }
+    res.sendFile(path.join(clientDistPath, 'index.html'));
   });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
+} else {
+  // Development mode - API info for root route
+  app.get('/', (req, res) => {
+    res.json({ 
+      message: 'The Happy Haul API',
+      version: '1.0.0',
+      endpoints: {
+        auth: '/api/auth/register, /api/auth/login, /api/auth/me',
+        kids: '/api/kids',
+        search: '/api/search',
+        share: '/api/share/:shareToken'
+      }
+    });
+  });
+  
+  // 404 handler for development
+  app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found' });
+  });
+}
 
 // Start server with error handling
 startServer().catch((error) => {
