@@ -5,7 +5,7 @@
     "buildCommand": "npm run install-all && npm run build"
   },
   "deploy": {
-    "startCommand": "node server/index.js",
+    "startCommand": "NODE_ENV=production node server/index.js",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
