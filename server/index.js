@@ -54,6 +54,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -1075,9 +1076,16 @@ app.use((err, req, res, next) => {
   }
 });
 
-// Serve static files from React app in production (must be after all API routes)
-if (process.env.NODE_ENV === 'production') {
-  const clientDistPath = path.join(__dirname, '../client/dist');
+// Serve static files from React app if dist directory exists (must be after all API routes)
+const clientDistPath = path.join(__dirname, '../client/dist');
+
+// Check if dist directory exists
+const distExists = fsSync.existsSync(clientDistPath);
+const indexPath = path.join(clientDistPath, 'index.html');
+const indexExists = fsSync.existsSync(indexPath);
+
+if (distExists && indexExists) {
+  console.log('✓ Serving React frontend from:', clientDistPath);
   
   // Serve static files from the React build
   app.use(express.static(clientDistPath));
@@ -1088,9 +1096,12 @@ if (process.env.NODE_ENV === 'production') {
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: 'Route not found' });
     }
-    res.sendFile(path.join(clientDistPath, 'index.html'));
+    res.sendFile(indexPath);
   });
 } else {
+  console.log('⚠️  Client dist directory not found, running in API-only mode');
+  console.log('   Expected path:', clientDistPath);
+  
   // Development mode - API info for root route
   app.get('/', (req, res) => {
     res.json({ 
