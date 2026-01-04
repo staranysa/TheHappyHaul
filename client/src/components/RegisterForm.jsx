@@ -43,7 +43,7 @@ function RegisterForm() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <img src="/logo.png?v=2" alt="The Happy Haul Logo" className="auth-logo" />
+          <img src="/logo.png?v=3" alt="The Happy Haul Logo" className="auth-logo" />
           <h1>The Happy Haul</h1>
           <h2>Create Account</h2>
         </div>

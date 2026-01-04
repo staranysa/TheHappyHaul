@@ -25,13 +25,13 @@ function Home() {
     }
   };
 
-  const handleAddKid = async (name, age) => {
+  const handleAddKid = async (name) => {
     if (!isAuthenticated) {
       alert('Please login to add kids');
       return;
     }
     try {
-      const response = await api.post('/kids', { name, age: age ? parseInt(age) : null });
+      const response = await api.post('/kids', { name });
       setKids([...kids, response.data]);
     } catch (error) {
       console.error('Error adding kid:', error);
@@ -64,6 +64,9 @@ function Home() {
   return (
     <div className="app">
       <header className="app-header">
+        <div className="logo-container">
+          <img src="/logo.png?v=3" alt="The Happy Haul Logo" className="app-logo" />
+        </div>
         <h1>The Happy Haul</h1>
         <p>A No-Nonsense Wishlist</p>
         <div className="auth-status">

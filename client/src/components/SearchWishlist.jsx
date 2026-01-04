@@ -97,7 +97,7 @@ function SearchWishlist() {
               {results.kids.map(kid => (
                 <div key={kid.id} className="kid-result-card">
                   <div className="kid-result-info">
-                    <h4>{kid.name}{kid.age && <span className="kid-age"> ({kid.age})</span>}</h4>
+                    <h4>{kid.name}</h4>
                     <p className="item-count-text">{kid.itemCount} {kid.itemCount === 1 ? 'item' : 'items'}</p>
                   </div>
                   <button

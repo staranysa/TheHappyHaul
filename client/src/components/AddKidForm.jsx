@@ -3,16 +3,14 @@ import './AddKidForm.css';
 
 function AddKidForm({ onAdd }) {
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [privacyAcknowledged, setPrivacyAcknowledged] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (name.trim() && privacyAcknowledged) {
-      onAdd(name.trim(), age.trim() || null);
+      onAdd(name.trim());
       setName('');
-      setAge('');
       setIsExpanded(false);
       setPrivacyAcknowledged(false);
     }
@@ -43,15 +41,6 @@ function AddKidForm({ onAdd }) {
         required
       />
       <p className="privacy-hint">💡 Tip: Use nicknames or initials only (e.g., "Little J" instead of "Jennifer Smith")</p>
-      <input
-        type="number"
-        placeholder="Age (optional)"
-        value={age}
-        onChange={(e) => setAge(e.target.value)}
-        min="0"
-        max="18"
-        className="add-kid-input"
-      />
       <label className="privacy-checkbox">
         <input
           type="checkbox"
@@ -70,7 +59,6 @@ function AddKidForm({ onAdd }) {
           onClick={() => {
             setIsExpanded(false);
             setName('');
-            setAge('');
             setPrivacyAcknowledged(false);
           }}
           className="cancel-btn"

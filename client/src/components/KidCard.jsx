@@ -49,7 +49,7 @@ function KidCard({ kid, onDelete, onUpdate, isAuthenticated = false }) {
     <div className="kid-card">
       <div className="kid-card-header">
         <div className="kid-name-section">
-          <h2>{kid.name}{kid.age && <span className="kid-age"> ({kid.age})</span>}</h2>
+          <h2>{kid.name}</h2>
           <span className="item-count">{kid.wishlist.length} items</span>
         </div>
         <div className="kid-card-actions">

@@ -70,7 +70,7 @@ function ShareView() {
     <div className="share-view">
       <header className="share-header">
         <div className="logo-container">
-          <img src="/logo.png?v=2" alt="The Happy Haul Logo" className="app-logo" />
+          <img src="/logo.png?v=3" alt="The Happy Haul Logo" className="app-logo" />
         </div>
         <h1>The Happy Haul</h1>
         <p className="share-subtitle">Shared Wishlist</p>
@@ -79,7 +79,7 @@ function ShareView() {
       <div className="shared-wishlist-container">
         <div className="shared-kid-card">
           <div className="shared-kid-header">
-            <h2>{kid.name}{kid.age && <span className="kid-age"> ({kid.age})</span>}'s Wishlist</h2>
+            <h2>{kid.name}'s Wishlist</h2>
             <span className="item-count">{kid.wishlist.length} items</span>
           </div>
 
