@@ -93,15 +93,13 @@ function Home() {
       {isAuthenticated && <AddKidForm onAdd={handleAddKid} />}
 
       <div className="kids-container">
-        {kids.length === 0 ? (
+        {kids.length === 0 && isAuthenticated ? (
           <div className="empty-state">
             <p>
-              {isAuthenticated 
-                ? "No kids added yet. Add your first kid to get started!"
-                : "Login to create and manage wishlists for your kids!"}
+              No kids added yet. Add your first kid to get started!
             </p>
           </div>
-        ) : (
+        ) : kids.length > 0 ? (
           kids.map(kid => (
             <KidCard
               key={kid.id}
@@ -111,7 +109,7 @@ function Home() {
               isAuthenticated={isAuthenticated}
             />
           ))
-        )}
+        ) : null}
       </div>
       
       <footer className="app-footer">
