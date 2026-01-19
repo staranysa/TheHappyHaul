@@ -642,13 +642,16 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 // Get all kids and their wishlists
 app.get('/api/kids', optionalAuth, async (req, res) => {
   try {
+    // Only return wishlists if user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.json([]);
+    }
+    
     const data = await readData();
     let kids = data.kids || [];
     
-    // If authenticated, filter by userId; otherwise return all (for public viewing)
-    if (req.user && req.user.userId) {
-      kids = kids.filter(kid => kid.userId === req.user.userId);
-    }
+    // Filter by userId for authenticated users
+    kids = kids.filter(kid => kid.userId === req.user.userId);
     
     // Filter purchaser email based on ownership
     kids = kids.map(kid => {
