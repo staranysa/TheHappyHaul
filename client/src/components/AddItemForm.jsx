@@ -19,7 +19,6 @@ function AddItemForm({ onSubmit, onCancel }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const previousName = formData.name;
     
     setFormData(prev => ({
       ...prev,
@@ -28,10 +27,8 @@ function AddItemForm({ onSubmit, onCancel }) {
     
     // Automatically fetch and populate name and image from URL when URL is entered
     if (name === 'url' && value && value.startsWith('http')) {
-      if (!previousName.trim()) {
-        fetchProductTitle(value);
-      }
-      // Always try to fetch image when URL changes
+      // Always fetch both title and image when URL is entered
+      fetchProductTitle(value);
       fetchProductImage(value);
     }
   };
@@ -56,16 +53,11 @@ function AddItemForm({ onSubmit, onCancel }) {
       if (response.ok) {
         const data = await response.json();
         if (data.title) {
-          // Only set the name if it's still empty (user hasn't typed anything)
-          setFormData(prev => {
-            if (!prev.name.trim()) {
-              return {
-                ...prev,
-                name: data.title
-              };
-            }
-            return prev;
-          });
+          // Always auto-fill the name when fetched from URL
+          setFormData(prev => ({
+            ...prev,
+            name: data.title
+          }));
         }
       }
     } catch (error) {
