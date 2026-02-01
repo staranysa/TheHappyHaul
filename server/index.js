@@ -251,12 +251,20 @@ async function extractImageFromUrl(url) {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9'
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Cache-Control': 'max-age=0'
       },
       maxRedirects: 5
     });
     
     const $ = cheerio.load(response.data);
+    const html = response.data;
     
     // Priority 1: Try OG image first
     let imageUrl = $('meta[property="og:image"]').attr('content');
@@ -266,7 +274,103 @@ async function extractImageFromUrl(url) {
       imageUrl = $('meta[name="twitter:image"]').attr('content');
     }
     
-    // Priority 3: Try schema.org structured data
+    // Priority 3: Amazon-specific handling
+    if (!imageUrl && url.includes('amazon.com')) {
+      // Try data-a-dynamic-image attribute (Amazon stores images here)
+      const dynamicImageAttr = $('img[data-a-dynamic-image]').attr('data-a-dynamic-image');
+      if (dynamicImageAttr) {
+        try {
+          const imageData = JSON.parse(dynamicImageAttr);
+          // Get the first (usually largest) image
+          const imageKeys = Object.keys(imageData);
+          if (imageKeys.length > 0) {
+            imageUrl = imageKeys[0];
+          }
+        } catch (e) {
+          // If JSON parse fails, try other methods
+        }
+      }
+      
+      // Try Amazon's main product image selectors
+      if (!imageUrl) {
+        const amazonSelectors = [
+          '#landingImage',
+          '#imgBlkFront',
+          '#main-image',
+          '[data-a-image-name="landingImage"]',
+          '.a-dynamic-image',
+          '#imageBlock_feature_div img'
+        ];
+        for (const selector of amazonSelectors) {
+          const img = $(selector).first();
+          if (img.length) {
+            imageUrl = img.attr('src') || img.attr('data-src') || img.attr('data-a-dynamic-image');
+            if (imageUrl) break;
+          }
+        }
+      }
+      
+      // Try to extract from JSON-LD structured data
+      if (!imageUrl) {
+        const jsonLdScripts = $('script[type="application/ld+json"]');
+        jsonLdScripts.each(function() {
+          try {
+            const jsonData = JSON.parse($(this).html());
+            if (jsonData.image) {
+              imageUrl = Array.isArray(jsonData.image) ? jsonData.image[0] : jsonData.image;
+              if (imageUrl) return false; // break
+            }
+            if (jsonData['@graph']) {
+              for (const item of jsonData['@graph']) {
+                if (item.image) {
+                  imageUrl = Array.isArray(item.image) ? item.image[0] : item.image;
+                  if (imageUrl) return false; // break
+                }
+              }
+            }
+          } catch (e) {
+            // Continue to next script
+          }
+        });
+      }
+    }
+    
+    // Priority 4: Walmart-specific handling
+    if (!imageUrl && url.includes('walmart.com')) {
+      const walmartSelectors = [
+        '[data-testid="product-image"]',
+        '[data-automation-id="product-image"]',
+        '.prod-hero-image img',
+        '.product-hero-image img',
+        '#product-overview img[class*="image"]',
+        'img[class*="ProductHeroImage"]'
+      ];
+      for (const selector of walmartSelectors) {
+        const img = $(selector).first();
+        if (img.length) {
+          imageUrl = img.attr('src') || img.attr('data-src') || img.attr('data-lazy-src');
+          if (imageUrl) break;
+        }
+      }
+      
+      // Try to extract from JSON-LD structured data
+      if (!imageUrl) {
+        const jsonLdScripts = $('script[type="application/ld+json"]');
+        jsonLdScripts.each(function() {
+          try {
+            const jsonData = JSON.parse($(this).html());
+            if (jsonData.image) {
+              imageUrl = Array.isArray(jsonData.image) ? jsonData.image[0] : jsonData.image;
+              if (imageUrl) return false; // break
+            }
+          } catch (e) {
+            // Continue to next script
+          }
+        });
+      }
+    }
+    
+    // Priority 5: Try schema.org structured data (generic)
     if (!imageUrl) {
       imageUrl = $('meta[itemprop="image"]').attr('content');
       if (!imageUrl) {
@@ -275,9 +379,8 @@ async function extractImageFromUrl(url) {
       }
     }
     
-    // Priority 4: Look for common product image selectors
+    // Priority 6: Look for common product image selectors
     if (!imageUrl) {
-      // Try common product image class names and IDs
       const productImageSelectors = [
         'img[class*="product"]',
         'img[id*="product"]',
@@ -298,7 +401,7 @@ async function extractImageFromUrl(url) {
       }
     }
     
-    // Priority 5: Find the largest image on the page (likely the product image)
+    // Priority 7: Find the largest image on the page (likely the product image)
     if (!imageUrl) {
       let largestImage = null;
       let largestSize = 0;
@@ -332,7 +435,7 @@ async function extractImageFromUrl(url) {
       }
     }
     
-    // Priority 6: Check if URL itself is an image
+    // Priority 8: Check if URL itself is an image
     if (!imageUrl && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url)) {
       return url;
     }
@@ -350,6 +453,13 @@ async function extractImageFromUrl(url) {
       } catch (e) {
         return null;
       }
+    }
+    
+    // Clean up Amazon image URLs (remove size parameters to get full resolution)
+    if (imageUrl && url.includes('amazon.com')) {
+      // Amazon URLs often have size parameters like _AC_SL1500_ or _AC_UX679_
+      // Remove these to get a better quality image
+      imageUrl = imageUrl.replace(/_[A-Z]{2}_[A-Z0-9]+_/g, '_AC_');
     }
     
     return imageUrl || null;
