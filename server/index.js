@@ -239,7 +239,7 @@ function generateShareToken() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-// Extract OG image from URL
+// Extract OG image from URL - Enhanced version with better fallbacks
 async function extractImageFromUrl(url) {
   try {
     if (!url || !url.startsWith('http')) {
@@ -247,26 +247,92 @@ async function extractImageFromUrl(url) {
     }
     
     const response = await axios.get(url, {
-      timeout: 5000,
+      timeout: 10000, // Increased to 10 seconds
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9'
+      },
+      maxRedirects: 5
     });
     
     const $ = cheerio.load(response.data);
     
-    // Try og:image first
+    // Priority 1: Try OG image first
     let imageUrl = $('meta[property="og:image"]').attr('content');
     
-    // If no OG image, try other common meta tags
+    // Priority 2: Try Twitter card image
     if (!imageUrl) {
       imageUrl = $('meta[name="twitter:image"]').attr('content');
     }
+    
+    // Priority 3: Try schema.org structured data
     if (!imageUrl) {
       imageUrl = $('meta[itemprop="image"]').attr('content');
+      if (!imageUrl) {
+        imageUrl = $('[itemtype*="Product"] [itemprop="image"]').attr('content') ||
+                   $('[itemtype*="Product"] [itemprop="image"]').attr('src');
+      }
     }
     
-    // If still no image, check if URL itself is an image
+    // Priority 4: Look for common product image selectors
+    if (!imageUrl) {
+      // Try common product image class names and IDs
+      const productImageSelectors = [
+        'img[class*="product"]',
+        'img[id*="product"]',
+        'img[class*="main"]',
+        'img[class*="primary"]',
+        '.product-image img',
+        '#product-image img',
+        '.main-image img',
+        '.primary-image img'
+      ];
+      
+      for (const selector of productImageSelectors) {
+        const img = $(selector).first();
+        if (img.length) {
+          imageUrl = img.attr('src') || img.attr('data-src') || img.attr('data-lazy-src');
+          if (imageUrl) break;
+        }
+      }
+    }
+    
+    // Priority 5: Find the largest image on the page (likely the product image)
+    if (!imageUrl) {
+      let largestImage = null;
+      let largestSize = 0;
+      
+      $('img').each(function() {
+        const src = $(this).attr('src') || $(this).attr('data-src') || $(this).attr('data-lazy-src');
+        if (!src) return;
+        
+        // Skip small images (likely icons, logos, etc.)
+        const width = parseInt($(this).attr('width')) || 0;
+        const height = parseInt($(this).attr('height')) || 0;
+        const size = width * height;
+        
+        // Skip images smaller than 200x200
+        if (size > largestSize && size > 40000) {
+          // Skip common non-product images
+          const srcLower = src.toLowerCase();
+          if (!srcLower.includes('logo') && 
+              !srcLower.includes('icon') && 
+              !srcLower.includes('avatar') &&
+              !srcLower.includes('banner') &&
+              !srcLower.includes('ad')) {
+            largestSize = size;
+            largestImage = src;
+          }
+        }
+      });
+      
+      if (largestImage) {
+        imageUrl = largestImage;
+      }
+    }
+    
+    // Priority 6: Check if URL itself is an image
     if (!imageUrl && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url)) {
       return url;
     }
@@ -275,7 +341,12 @@ async function extractImageFromUrl(url) {
     if (imageUrl && !imageUrl.startsWith('http')) {
       try {
         const baseUrl = new URL(url);
-        imageUrl = new URL(imageUrl, baseUrl).href;
+        // Handle protocol-relative URLs (//example.com/image.jpg)
+        if (imageUrl.startsWith('//')) {
+          imageUrl = baseUrl.protocol + imageUrl;
+        } else {
+          imageUrl = new URL(imageUrl, baseUrl).href;
+        }
       } catch (e) {
         return null;
       }
@@ -732,6 +803,22 @@ app.post('/api/extract-title', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Extract title error:', error);
     res.status(500).json({ error: 'Failed to extract title from URL' });
+  }
+});
+
+// Extract product image from URL endpoint
+app.post('/api/extract-image', authenticateToken, async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+    
+    const imageUrl = await extractImageFromUrl(url);
+    res.json({ imageUrl: imageUrl || null });
+  } catch (error) {
+    console.error('Extract image error:', error);
+    res.status(500).json({ error: 'Failed to extract image from URL' });
   }
 });
 

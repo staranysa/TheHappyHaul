@@ -15,6 +15,7 @@ function AddItemForm({ onSubmit, onCancel }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [fetchingTitle, setFetchingTitle] = useState(false);
+  const [fetchingImage, setFetchingImage] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,10 +26,13 @@ function AddItemForm({ onSubmit, onCancel }) {
       [name]: value
     }));
     
-    // Automatically fetch and populate name from URL when URL is entered
-    // Only auto-fill if name field is currently empty
-    if (name === 'url' && value && value.startsWith('http') && !previousName.trim()) {
-      fetchProductTitle(value);
+    // Automatically fetch and populate name and image from URL when URL is entered
+    if (name === 'url' && value && value.startsWith('http')) {
+      if (!previousName.trim()) {
+        fetchProductTitle(value);
+      }
+      // Always try to fetch image when URL changes
+      fetchProductImage(value);
     }
   };
   
@@ -71,10 +75,49 @@ function AddItemForm({ onSubmit, onCancel }) {
     }
   };
 
+  const fetchProductImage = async (url) => {
+    if (!url || !url.startsWith('http')) {
+      return;
+    }
+    
+    setFetchingImage(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${API_BASE}/extract-image`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ url })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.imageUrl) {
+          setFormData(prev => ({
+            ...prev,
+            imageUrl: data.imageUrl
+          }));
+          // Show preview of extracted image
+          setImagePreview(data.imageUrl);
+          // Clear any uploaded file since we have an extracted image
+          setImageFile(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching product image:', error);
+    } finally {
+      setFetchingImage(false);
+    }
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
+      // Clear extracted image preview
+      setFormData(prev => ({ ...prev, imageUrl: '' }));
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -170,40 +213,43 @@ function AddItemForm({ onSubmit, onCancel }) {
         rows="2"
         className="form-textarea"
       />
-      <div className="image-upload-section">
-        <label className="image-upload-label">
-          Upload Image (optional)
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="image-file-input"
-          />
-        </label>
-        {imagePreview && (
-          <div className="image-preview-container">
-            <img src={imagePreview} alt="Preview" className="image-preview" />
-            <button
-              type="button"
-              onClick={() => {
-                setImageFile(null);
-                setImagePreview(null);
-              }}
-              className="remove-image-btn"
-            >
-              Remove
-            </button>
-          </div>
-        )}
-      </div>
-      <input
-        type="url"
-        name="imageUrl"
-        placeholder="Or enter Image URL (optional - auto-extracted from product URL if not provided)"
-        value={formData.imageUrl}
-        onChange={handleChange}
-        className="form-input"
-      />
+      
+      {/* Show image preview if available */}
+      {fetchingImage && (
+        <div className="fetching-indicator">🖼️ Fetching image from URL...</div>
+      )}
+      {imagePreview && (
+        <div className="image-preview-container">
+          <img src={imagePreview} alt="Preview" className="image-preview" />
+          <button
+            type="button"
+            onClick={() => {
+              setFormData(prev => ({ ...prev, imageUrl: '' }));
+              setImagePreview(null);
+              setImageFile(null);
+            }}
+            className="remove-image-btn"
+          >
+            Remove
+          </button>
+        </div>
+      )}
+      
+      {/* Make upload section less prominent - collapsible */}
+      <details className="image-upload-details">
+        <summary className="image-upload-summary">Upload Image (optional)</summary>
+        <div className="image-upload-section">
+          <label className="image-upload-label">
+            Choose file
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="image-file-input"
+            />
+          </label>
+        </div>
+      </details>
       <select
         name="priority"
         value={formData.priority}
